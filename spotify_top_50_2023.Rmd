@@ -1,0 +1,27 @@
+---
+title: "Top 50 Tracks Spotify"
+output: html_document
+date: "2024-02-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(janitor)
+library(skimr)
+library(naniar)
+library(visdat)
+library(here)
+library(palmerpenguins)
+library(RColorBrewer)
+library(paletteer)
+``` 
+
+```{r}
+spotify2023 <- read_csv("top_50_2023.csv")
+```
+
+
