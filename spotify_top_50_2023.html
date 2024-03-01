@@ -375,6 +375,61 @@ library(paletteer)</code></pre>
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code>spotify2023</code></pre>
+<pre><code>## # A tibble: 50 × 19
+##    artist_name    track_name  is_explicit album_release_date genres danceability
+##    &lt;chr&gt;          &lt;chr&gt;       &lt;lgl&gt;       &lt;date&gt;             &lt;chr&gt;         &lt;dbl&gt;
+##  1 Miley Cyrus    Flowers     FALSE       2023-08-18         [&#39;pop…        0.706
+##  2 SZA            Kill Bill   FALSE       2022-12-08         [&#39;pop…        0.644
+##  3 Harry Styles   As It Was   FALSE       2022-05-20         [&#39;pop…        0.52 
+##  4 Jung Kook      Seven (fea… TRUE        2023-11-03         [&#39;k-p…        0.79 
+##  5 Eslabon Armado Ella Baila… FALSE       2023-04-28         [&#39;cor…        0.668
+##  6 Taylor Swift   Cruel Summ… FALSE       2019-08-23         [&#39;pop…        0.552
+##  7 Metro Boomin   Creepin&#39; (… TRUE        2022-12-02         [&#39;rap…        0.715
+##  8 Rema           Calm Down … FALSE       2023-04-27         [&#39;afr…        0.799
+##  9 Bizarrap       Shakira: B… FALSE       2023-01-11         [&#39;arg…        0.778
+## 10 Taylor Swift   Anti-Hero   FALSE       2022-10-21         [&#39;pop…        0.637
+## # ℹ 40 more rows
+## # ℹ 13 more variables: valence &lt;dbl&gt;, energy &lt;dbl&gt;, loudness &lt;dbl&gt;,
+## #   acousticness &lt;dbl&gt;, instrumentalness &lt;dbl&gt;, liveness &lt;dbl&gt;,
+## #   speechiness &lt;dbl&gt;, key &lt;dbl&gt;, tempo &lt;dbl&gt;, mode &lt;dbl&gt;, duration_ms &lt;dbl&gt;,
+## #   time_signature &lt;dbl&gt;, popularity &lt;dbl&gt;</code></pre>
+<pre class="r"><code>summary(spotify2023)</code></pre>
+<pre><code>##  artist_name         track_name        is_explicit     album_release_date  
+##  Length:50          Length:50          Mode :logical   Min.   :2004-11-12  
+##  Class :character   Class :character   FALSE:28        1st Qu.:2022-05-14  
+##  Mode  :character   Mode  :character   TRUE :22        Median :2023-01-12  
+##                                                        Mean   :2021-07-13  
+##                                                        3rd Qu.:2023-04-23  
+##                                                        Max.   :2023-11-10  
+##     genres           danceability       valence           energy      
+##  Length:50          Min.   :0.4450   Min.   :0.1310   Min.   :0.4170  
+##  Class :character   1st Qu.:0.5595   1st Qu.:0.3440   1st Qu.:0.5567  
+##  Mode  :character   Median :0.6475   Median :0.5070   Median :0.6780  
+##                     Mean   :0.6626   Mean   :0.5107   Mean   :0.6599  
+##                     3rd Qu.:0.7765   3rd Qu.:0.6545   3rd Qu.:0.7365  
+##                     Max.   :0.9110   Max.   :0.8930   Max.   :0.9650  
+##     loudness        acousticness     instrumentalness       liveness      
+##  Min.   :-10.613   Min.   :0.00146   Min.   :0.0000000   Min.   :0.02320  
+##  1st Qu.: -7.126   1st Qu.:0.08628   1st Qu.:0.0000000   1st Qu.:0.09467  
+##  Median : -5.639   Median :0.16450   Median :0.0000120   Median :0.12150  
+##  Mean   : -6.012   Mean   :0.25333   Mean   :0.0205418   Mean   :0.16128  
+##  3rd Qu.: -4.877   3rd Qu.:0.40550   3rd Qu.:0.0002632   3rd Qu.:0.22700  
+##  Max.   : -2.810   Max.   :0.83000   Max.   :0.6340000   Max.   :0.37100  
+##   speechiness           key         tempo             mode     
+##  Min.   :0.02560   Min.   : 0   Min.   : 67.03   Min.   :0.00  
+##  1st Qu.:0.03895   1st Qu.: 2   1st Qu.: 97.96   1st Qu.:0.00  
+##  Median :0.05095   Median : 5   Median :124.98   Median :1.00  
+##  Mean   :0.08359   Mean   : 5   Mean   :124.07   Mean   :0.56  
+##  3rd Qu.:0.08120   3rd Qu.: 7   3rd Qu.:138.06   3rd Qu.:1.00  
+##  Max.   :0.33300   Max.   :11   Max.   :203.76   Max.   :1.00  
+##   duration_ms     time_signature   popularity   
+##  Min.   :131013   Min.   :3.0    Min.   :72.00  
+##  1st Qu.:176937   1st Qu.:4.0    1st Qu.:85.00  
+##  Median :199740   Median :4.0    Median :89.00  
+##  Mean   :200458   Mean   :3.9    Mean   :88.10  
+##  3rd Qu.:228220   3rd Qu.:4.0    3rd Qu.:92.75  
+##  Max.   :272373   Max.   :4.0    Max.   :99.00</code></pre>
 
 
 

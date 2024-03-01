@@ -24,4 +24,12 @@ library(paletteer)
 spotify2023 <- read_csv("top_50_2023.csv")
 ```
 
+```{r}
+spotify2023
+```
+
+
+```{r}
+summary(spotify2023)
+```
 
