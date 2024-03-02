@@ -1,6 +1,8 @@
 ---
 title: "Top 50 Tracks Spotify"
-output: html_document
+output: 
+  html_document: 
+    keep_md: true
 date: "2024-02-29"
 ---
 
@@ -28,8 +30,92 @@ spotify2023 <- read_csv("top_50_2023.csv")
 spotify2023
 ```
 
+```{r}
+
+```
 
 ```{r}
-summary(spotify2023)
+spotify2023 %>% 
+  pivot_wider(names_from = "genres", #the observations under key will become new columns
+              values_from = "is_explicit")
 ```
+
+```{r}
+spotify2023$genres <-
+  gsub("\\[|\\]", "", spotify2023$genres)
+```
+  separate(patient, into= c("patient", "sex"), sep = "_") #seperate patient from sex with the _
+
+```{r}
+strsplit(spotify2023$genres, ",")
+```
+
+```{r}
+genrevector <- spotify2023$genres
+```
+
+```{r}
+genrevector
+```
+```{r}
+pop <- which(genrevector %in% c("'pop'"))
+```
+
+
+```{r}
+spotify2023 %>%
+  mutate(pop = ifelse("'pop'" %in% genres, TRUE, FALSE))
+```
+
+
+```{r}
+df <- data.frame(matrix(unlist(strsplit(spotify2023$genres, ", ")), nrow=1, byrow=TRUE))
+```
+
+```{r}
+# Sample data frame with genres in a single column
+df <- data.frame(genres = "['pop']")
+
+# Split the genres column into separate columns
+split_genres <- strsplit(as.character(df$genres), ", ")[[1]]
+
+# Transpose the result to create columns instead of rows
+split_genres <- t(matrix(split_genres, nrow=1))
+
+# Create a data frame with the split genres as columns
+df_split <- data.frame(split_genres)
+
+# Rename the columns if needed
+colnames(df_split) <- paste0("genre_", 1:ncol(df_split))
+
+# Print the resulting data frame
+print(df_split)
+
+```
+```{r}
+#genre_list <- strsplit(spotify2023$genres, ", ")
+#unique_genres <- unique(unlist(genre_list))
+#b <- cbind(spotify2023,genre_matrix)
+
+#genre_matrix <- matrix(0, nrow = nrow(spotify2023), ncol = length(unique_genres), dimnames = list(NULL, unique_genres))
+#for (i in 1:length(genre_list)) {
+  #genre_matrix[i, genre_list[[i]]] <- 1}
+#genre_df <- as.data.frame(genre_matrix)
+#df <- cbind(df, genre_df)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
