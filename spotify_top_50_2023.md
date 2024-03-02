@@ -21,6 +21,7 @@ library(RColorBrewer)
 library(paletteer)
 ```
 
+## Load the data
 
 ```r
 spotify2023 <- read_csv("top_50_2023.csv")
@@ -39,6 +40,7 @@ spotify2023 <- read_csv("top_50_2023.csv")
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
 
+## Clean the data
 
 ```r
 genre_list <- strsplit(spotify2023$genres, ", ")
@@ -50,4 +52,13 @@ for (i in 1:length(genre_list)) {
 genre_df <- as.data.frame(genre_matrix)
 spotify2023 <- cbind(spotify2023, genre_df)
 ```
+
+
+```r
+spotify2023 <- spotify2023 %>% 
+  separate(album_release_date, into=c("year", "month", "day"), sep="-")
+```
+
+
+
 
