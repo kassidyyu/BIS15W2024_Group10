@@ -60,5 +60,9 @@ spotify2023 <- spotify2023 %>%
 ```
 
 
+```r
+spotify2023 <- spotify2023 %>% clean_names()
+```
+
 
 

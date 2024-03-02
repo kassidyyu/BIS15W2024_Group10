@@ -390,6 +390,7 @@ genre_df &lt;- as.data.frame(genre_matrix)
 spotify2023 &lt;- cbind(spotify2023, genre_df)</code></pre>
 <pre class="r"><code>spotify2023 &lt;- spotify2023 %&gt;% 
   separate(album_release_date, into=c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;), sep=&quot;-&quot;)</code></pre>
+<pre class="r"><code>spotify2023 &lt;- spotify2023 %&gt;% clean_names()</code></pre>
 </div>
 
 
