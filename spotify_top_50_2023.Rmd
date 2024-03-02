@@ -44,6 +44,9 @@ spotify2023 <- spotify2023 %>%
   separate(album_release_date, into=c("year", "month", "day"), sep="-")
 ```
 
+```{r}
+spotify2023 <- spotify2023 %>% clean_names()
+```
 
 
 
