@@ -9,6 +9,9 @@ date: "2024-02-29"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+```{r}
+library(stringr)
+```
 
 ```{r message=FALSE, warning=FALSE}
 library(tidyverse)
@@ -26,6 +29,29 @@ library(paletteer)
 ```{r}
 spotify2023 <- read_csv("top_50_2023.csv")
 ```
+
+```{r}
+split_spotify2023 <- spotify2023 %>% 
+  separate(genres, into = c("genre1", "genre2", "genre3", "genre4", "genre5", "genre6"), sep=",") %>% 
+  select(track_name, genre1, genre2, genre3, genre4, genre5, genre6) %>% 
+  pivot_longer(-track_name,
+               names_to = "type",
+               values_to = "class") %>% 
+  filter(class != "NA")
+```
+```{r}
+split_spotify2023
+```
+
+```{r}
+split_spotify2023 %>% 
+  str_remove_all(class, "[:punct:]")
+  
+
+
+temp <- str_remove_all(split_spotify2023$class, "[:punct:]")
+```
+
 
 ## Clean the data
 ```{r}
