@@ -399,6 +399,11 @@ library(tidyr)</code></pre>
         values_fn = length) %&gt;% 
   mutate(across(everything(), ~replace(.x, is.na(.x), 0)))</code></pre>
 </div>
+<div id="seperate-the-dates-into-year-month-and-day" class="section level2">
+<h2>Seperate the dates into year, month, and day</h2>
+<pre class="r"><code>spotify &lt;- split_spotify2023 %&gt;% 
+  separate(album_release_date, into = c(&quot;year&quot;, &quot;month&quot;, &quot;day&quot;), sep = &quot;-&quot;)</code></pre>
+</div>
 
 
 

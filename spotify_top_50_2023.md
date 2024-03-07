@@ -74,3 +74,12 @@ split_spotify2023 <- split_spotify2023 %>%
         values_fn = length) %>% 
   mutate(across(everything(), ~replace(.x, is.na(.x), 0)))
 ```
+
+## Seperate the dates into year, month, and day
+
+```r
+spotify <- split_spotify2023 %>% 
+  separate(album_release_date, into = c("year", "month", "day"), sep = "-")
+```
+
+
