@@ -1,0 +1,194 @@
+---
+title: "Lejla's Spotify Top 50 Tracks 2023"
+author: "Lejla Becirevic"
+date: "2024-03-07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(janitor)
+library(naniar)
+library(tidyr)
+``` 
+
+```{r}
+spotify2023 <- read_csv("top_50_2023.csv") %>% clean_names()
+```
+
+```{r}
+split_spotify2023 <- spotify2023 %>% 
+  separate(genres, into = c("genre1", "genre2", "genre3", "genre4", "genre5", "genre6"), sep=",") %>% 
+  pivot_longer(cols = starts_with("genre"),
+               names_to = "type",
+               values_to = "class") %>% 
+  filter(class != "NA") %>% 
+  select(-type)
+```
+
+## Re-use select to pull out the punctuation
+```{r}
+split_spotify2023 <- split_spotify2023 %>% 
+  separate(class, into = c("punctuation", "class2"), sep = "'") %>% 
+  select(-punctuation)
+```
+
+## pivot_wider 
+```{r}
+split_spotify2023 <- split_spotify2023 %>%
+    pivot_wider(
+        names_from = class2,
+        values_from = class2,
+        values_fn = length) %>% 
+  mutate(across(everything(), ~replace(.x, is.na(.x), 0)))
+```
+
+##Seperate the album release data into year, month, and day
+```{r}
+spotify <- split_spotify2023 %>% 
+  separate(album_release_date, into = c("year", "month", "day"), sep = "-")
+```
+
+
+
+## Pull all the pop songs and make a scatterplot graph with the dancibility and energy. Make sure to add color
+```{r}
+spotify %>% 
+  filter(pop > 0) %>% 
+  ggplot(aes(x = danceability, y = energy, color = danceability)) +
+  geom_point() +
+  labs(title = "Pop Songs 2023",
+       x = "Danceability",
+       y = "Energy")
+```
+
+## Make a bar plot for all the songs released
+```{r}
+spotify %>% 
+  ggplot(aes(x = year)) +
+  geom_bar() +
+  labs(title = "Songs Released in 2023",
+       x = "Year",
+       y = "Number of Songs")
+```
+
+## How many songs are in pop through rock? Make a graph
+```{r}
+spotify %>% 
+  select(pop:rock) %>% 
+  gather(key = "genre", value = "count") %>% 
+  ggplot(aes(x = genre, y = count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Songs in Each Genre",
+       x = "Genre",
+       y = "Number of Songs")+
+  coord_flip()
+```
+
+## Pull all the columns that contain the word `pop` but remove popularity. Make a graph of the counts in each column
+```{r}
+spotify %>% 
+  select(contains("pop")) %>% 
+  select(-popularity) %>% 
+  gather(key = "pop", value = "count") %>% 
+  ggplot(aes(x = pop, y = count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "All Pop Songs",
+       x = NULL,
+       y = "Number of Songs")+
+  coord_flip()
+```
+
+## make a shiny app for all the graphs used so far. Make sure to include the headers and sidebar
+```{r}
+library(shiny)
+library(shinydashboard)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Spotify 2023"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Scatterplot", tabName = "scatter"),
+      menuItem("Barplot", tabName = "bar"),
+      menuItem("Genre Barplot", tabName = "genre"),
+      menuItem("Pop Songs", tabName = "pop")
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "scatter",
+              fluidRow(
+                box(plotOutput("scatterplot", height = 250))
+              )
+      ),
+      tabItem(tabName = "bar",
+              fluidRow(
+                box(plotOutput("barplot", height = 250))
+              )
+      ),
+      tabItem(tabName = "genre",
+              fluidRow(
+                box(plotOutput("genrebarplot", height = 250))
+              )
+      ),
+      tabItem(tabName = "pop",
+              fluidRow(
+                box(plotOutput("popbarplot", height = 250))
+              )
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$scatterplot <- renderPlot({
+    spotify %>% 
+      filter(pop > 0) %>% 
+      ggplot(aes(x = danceability, y = energy, color = danceability)) +
+      geom_point() +
+      labs(title = "Pop Songs 2023",
+           x = "Danceability",
+           y = "Energy")
+  })
+  
+  output$barplot <- renderPlot({
+    spotify %>% 
+      ggplot(aes(x = year)) +
+      geom_bar() +
+      labs(title = "Songs Released in 2023",
+           x = "Year",
+           y = "Number of Songs")
+  })
+  
+  output$genrebarplot <- renderPlot({
+    spotify %>% 
+      select(pop:rock) %>% 
+      gather(key = "genre", value = "count") %>% 
+      ggplot(aes(x = genre, y = count)) +
+      geom_bar(stat = "identity") +
+      labs(title = "Number of Songs in Each Genre",
+           x = "Genre",
+           y = "Number of Songs")+
+      coord_flip()
+  })
+  
+  output$popbarplot <- renderPlot({
+    spotify %>% 
+      select(contains("pop")) %>% 
+      select(-popularity) %>% 
+      gather(key = "pop", value = "count") %>% 
+      ggplot(aes(x = pop, y = count)) +
+      geom_bar(stat = "identity") +
+      labs(title = "All Pop Songs",
+           x = NULL,
+           y = "Number of Songs")+
+      coord_flip()
+  })
+}
+
+shinyApp(ui, server)
+```

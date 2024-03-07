@@ -12,19 +12,14 @@ date: "2024-02-29"
 ```r
 library(tidyverse)
 library(janitor)
-library(skimr)
 library(naniar)
-library(visdat)
-library(here)
-library(palmerpenguins)
-library(RColorBrewer)
-library(paletteer)
+library(tidyr)
 ```
 
 ## Load the data
 
 ```r
-spotify2023 <- read_csv("top_50_2023.csv")
+spotify2023 <- read_csv("top_50_2023.csv") %>% clean_names()
 ```
 
 ```
@@ -40,29 +35,42 @@ spotify2023 <- read_csv("top_50_2023.csv")
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ```
 
-## Clean the data
 
 ```r
-genre_list <- strsplit(spotify2023$genres, ", ")
-unique_genres <- unique(unlist(genre_list))
-genre_matrix <- matrix(0, nrow = nrow(spotify2023), ncol = length(unique_genres), dimnames = list(NULL, unique_genres))
-for (i in 1:length(genre_list)) {
-  genre_matrix[i, genre_list[[i]]] <- 1
-}
-genre_df <- as.data.frame(genre_matrix)
-spotify2023 <- cbind(spotify2023, genre_df)
+split_spotify2023 <- spotify2023 %>% 
+  separate(genres, into = c("genre1", "genre2", "genre3", "genre4", "genre5", "genre6"), sep=",") %>% 
+  pivot_longer(cols = starts_with("genre"),
+               names_to = "type",
+               values_to = "class") %>% 
+  filter(class != "NA") %>% 
+  select(-type)
 ```
 
+```
+## Warning: Expected 6 pieces. Missing pieces filled with `NA` in 48 rows [1, 2, 3, 4, 5,
+## 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, ...].
+```
+
+## Re-use select to pull out the punctuation
 
 ```r
-spotify2023 <- spotify2023 %>% 
-  separate(album_release_date, into=c("year", "month", "day"), sep="-")
+split_spotify2023 <- split_spotify2023 %>% 
+  separate(class, into = c("punctuation", "class2"), sep = "'") %>% 
+  select(-punctuation)
 ```
 
+```
+## Warning: Expected 2 pieces. Additional pieces discarded in 126 rows [1, 2, 3, 4, 5, 6,
+## 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, ...].
+```
+
+## pivot_wider 
 
 ```r
-spotify2023 <- spotify2023 %>% clean_names()
+split_spotify2023 <- split_spotify2023 %>%
+    pivot_wider(
+        names_from = class2,
+        values_from = class2,
+        values_fn = length) %>% 
+  mutate(across(everything(), ~replace(.x, is.na(.x), 0)))
 ```
-
-
-
