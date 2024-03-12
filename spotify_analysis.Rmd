@@ -1,0 +1,366 @@
+---
+title: "Working throught various code"
+author: "Group 10"
+date: "2024-03-07"
+output: 
+  html_document: 
+    keep_md: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(janitor)
+library(naniar)
+library(tidyr)
+``` 
+
+```{r}
+spotify2023 <- read_csv("top_50_2023.csv") %>% clean_names()
+```
+
+```{r}
+split_spotify2023 <- spotify2023 %>% 
+  separate(genres, into = c("genre1", "genre2", "genre3", "genre4", "genre5", "genre6"), sep=",") %>% 
+  pivot_longer(cols = starts_with("genre"),
+               names_to = "type",
+               values_to = "class") %>% 
+  filter(class != "NA") %>% 
+  select(-type)
+```
+
+## Re-use select to pull out the punctuation
+```{r}
+split_spotify2023 <- split_spotify2023 %>% 
+  separate(class, into = c("punctuation", "class2"), sep = "'") %>% 
+  select(-punctuation)
+```
+
+## pivot_wider 
+```{r}
+split_spotify2023 <- split_spotify2023 %>%
+    pivot_wider(
+        names_from = class2,
+        values_from = class2,
+        values_fn = length) %>% 
+  mutate(across(everything(), ~replace(.x, is.na(.x), 0)))
+```
+
+## Seperate the album release data into year, month, and day
+```{r}
+spotify <- split_spotify2023 %>% 
+  separate(album_release_date, into = c("year", "month", "day"), sep = "-") %>% 
+  clean_names()
+```
+
+```{r}
+names(spotify)
+```
+
+
+## Count the total number of song in each column from pop to musica_chihuahuense and fill with springgreen3 and outline in black. 
+```{r}
+spotify %>% 
+  select(pop:musica_chihuahuense) %>% 
+  gather(key = "genre", value = "count") %>% 
+  ggplot(aes(x = genre, y = count)) +
+  geom_bar(stat = "identity", fill = "springgreen3", color="black") +
+  labs(title = "Number of Songs in Each Genre",
+       x = "Genre",
+       y = "Number of Songs")+
+  coord_flip()
+```
+
+
+## Pull all the pop songs and make a scatterplot graph with the dancibility and energy. Make sure to add color
+```{r}
+spotify %>% 
+  filter(pop > 0) %>% 
+  ggplot(aes(x = danceability, y = energy, color = danceability)) +
+  geom_point() +
+  labs(title = "Pop Songs 2023",
+       x = "Danceability",
+       y = "Energy")
+```
+
+## Make a bar plot for all the songs released
+```{r}
+spotify %>% 
+  ggplot(aes(x = year)) +
+  geom_bar() +
+  labs(title = "Songs Released in 2023",
+       x = "Year",
+       y = "Number of Songs")
+```
+
+## How many songs are in pop through rock? Make a graph
+```{r}
+spotify %>% 
+  select(pop:rock) %>% 
+  gather(key = "genre", value = "count") %>% 
+  ggplot(aes(x = genre, y = count)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Songs in Each Genre",
+       x = "Genre",
+       y = "Number of Songs")+
+  coord_flip()
+```
+
+## Pull all the columns that contain the word `pop` but remove popularity. Make a graph of the counts in each column and make sure to include the category pop. fill the bars with the color springgreen3.
+```{r}
+spotify %>% 
+  select(contains("pop")) %>% 
+  select(-popularity) %>% 
+  gather(key = "pop", value = "count") %>% 
+  ggplot(aes(x = pop, y = count)) +
+  geom_bar(stat = "identity", fill = "springgreen3") +
+  labs(title = "All Pop Songs",
+       x = NULL,
+       y = "Number of Songs")+
+  coord_flip()
+```
+
+## make a shiny app for all the graphs used so far. Make sure to include the headers and sidebar
+```{r}
+library(shiny)
+library(shinydashboard)
+
+ui <- dashboardPage(
+  dashboardHeader(title = "Spotify 2023"),
+  dashboardSidebar(
+    sidebarMenu(
+      menuItem("Scatterplot", tabName = "scatter"),
+      menuItem("Barplot", tabName = "bar"),
+      menuItem("Genre Barplot", tabName = "genre"),
+      menuItem("Pop Songs", tabName = "pop")
+    )
+  ),
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "scatter",
+              fluidRow(
+                box(plotOutput("scatterplot", height = 250))
+              )
+      ),
+      tabItem(tabName = "bar",
+              fluidRow(
+                box(plotOutput("barplot", height = 250))
+              )
+      ),
+      tabItem(tabName = "genre",
+              fluidRow(
+                box(plotOutput("genrebarplot", height = 250))
+              )
+      ),
+      tabItem(tabName = "pop",
+              fluidRow(
+                box(plotOutput("popbarplot", height = 250))
+              )
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+  output$scatterplot <- renderPlot({
+    spotify %>% 
+      filter(pop > 0) %>% 
+      ggplot(aes(x = danceability, y = energy, color = danceability)) +
+      geom_point() +
+      labs(title = "Pop Songs 2023",
+           x = "Danceability",
+           y = "Energy")
+  })
+  
+  output$barplot <- renderPlot({
+    spotify %>% 
+      ggplot(aes(x = year)) +
+      geom_bar() +
+      labs(title = "Songs Released in 2023",
+           x = "Year",
+           y = "Number of Songs")
+  })
+  
+  output$genrebarplot <- renderPlot({
+    spotify %>% 
+      select(pop:rock) %>% 
+      gather(key = "genre", value = "count") %>% 
+      ggplot(aes(x = genre, y = count)) +
+      geom_bar(stat = "identity") +
+      labs(title = "Number of Songs in Each Genre",
+           x = "Genre",
+           y = "Number of Songs")+
+      coord_flip()
+  })
+  
+  output$popbarplot <- renderPlot({
+    spotify %>% 
+      select(contains("pop")) %>% 
+      select(-popularity) %>% 
+      gather(key = "pop", value = "count") %>% 
+      ggplot(aes(x = pop, y = count)) +
+      geom_bar(stat = "identity") +
+      labs(title = "All Pop Songs",
+           x = NULL,
+           y = "Number of Songs")+
+      coord_flip()
+  })
+}
+
+shinyApp(ui, server)
+```
+
+
+## what is the most commonly occuring artist
+```{r}
+spotify %>% 
+  count(artist_name) %>% 
+  arrange(desc(n))
+```
+
+## make a denisty graph on the duration of all songs and convert milliseconds to minutes. color the graph in springgreen3. chnage the bins size to 10
+```{r}
+spotify %>% 
+  mutate(duration_ms = duration_ms/60000) %>%
+  ggplot(aes(x = duration_ms)) +
+  geom_density(fill = "springgreen3") +
+  labs(title = "Density of Song Duration",
+       x = "Duration (min)",
+       y = "Density")
+```
+
+
+
+## make a grpah on the dancability and energy. fill the dots in springgreen3 and increase the size of the dots to 2
+```{r}
+spotify %>% 
+  ggplot(aes(x = danceability, y = energy)) +
+  geom_point(size = 2.5) +
+  labs(title = "Danceability and Energy",
+       x = "Danceability",
+       y = "Energy")+
+  theme_minimal()
+```
+
+## what are all the k_pop and k_pop_girl_group songs
+```{r}
+spotify %>%
+  filter(k_pop > 0 | k_pop_girl_group >0) %>% 
+  select(artist_name, track_name) 
+```
+
+## what is the danciability and speechiness of k_pop and k_pop_girl_group songs
+```{r}
+spotify %>%
+  filter(k_pop > 0 | k_pop_girl_group >0) %>%
+  ggplot(aes(x = danceability, y = energy, color = track_name)) +
+  geom_point() 
+```
+
+## Make a graoh of liveness and speechiness of all the songs
+```{r}
+spotify %>%
+  ggplot(aes(x = liveness, y = acousticness)) +
+  geom_point() 
+```
+
+## Make a graph of the key versus valence. Split valence equally into 5 groups
+```{r}
+spotify %>%
+  ggplot(aes(x = key, y = valence, color = valence)) +
+  geom_point() +
+  facet_wrap(~cut(valence, 5)) 
+
+```
+
+## mutate is_explicit into 2 categories. make side by side boxplots of these categories and the loudness
+```{r}
+spotify %>%
+  mutate(is_explicit = ifelse(is_explicit == 1, "Explicit", "Not Explicit")) %>%
+  ggplot(aes(x = is_explicit, y = loudness, fill = is_explicit)) +
+  geom_boxplot(fill="springgreen3") +
+  labs(title = "Loudness of Explicit and Non-Explicit Songs",
+       x = NULL,
+       y = "Loudness")+
+  theme_minimal()
+```
+
+
+## Make a graph of the dancability and tempo
+```{r}
+spotify %>%
+  ggplot(aes(x = danceability, y = tempo)) +
+  geom_point(size=2.5) +
+  labs(title = "Danceability and Tempo",
+       x = "Danceability",
+       y = "Tempo")+
+  theme_minimal()
+```
+
+
+## Make a graph of the energy and tempo
+```{r}
+spotify %>%
+  ggplot(aes(x = energy, y = tempo)) +
+  geom_point(size=2.5) +
+  labs(title = "Energy and Tempo",
+       x = "Energy",
+       y = "Tempo")+
+  theme_minimal()
+```
+
+## Make a graph of the dancability and valance. Add a regression line
+```{r}
+spotify %>%
+  ggplot(aes(x = danceability, y = valence)) +
+  geom_point(size=2.5) +
+  geom_smooth(method = "lm", color="springgreen3") +
+  labs(title = "Danceability and Valence",
+       x = "Danceability",
+       y = "Valence")+
+  theme_minimal()
+  
+```
+
+Make a graph on energy and temp and increase the text size to 20 and make the text in the middle
+```{r}
+spotify %>%
+  ggplot(aes(x = energy, y = tempo)) +
+  geom_point(size=2.5) +
+  geom_smooth(method = "lm", color="springgreen3") +
+  labs(title = "Energy and Tempo",
+       x = "Energy",
+       y = "Tempo")+
+  theme_minimal()+
+  theme(text = element_text(size = 20))+
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+
+## Make a graph of the acousticts and liveiness
+```{r}
+spotify %>%
+  ggplot(aes(x = acousticness, y = liveness)) +
+  geom_point(size=2.5) +
+  labs(title = "Acousticness and Liveness",
+       x = "Acousticness",
+       y = "Liveness")+
+  theme_minimal()
+```
+
+## Group by artist name and count the number of songs released by the top 5 artist. Fill the bars with springgreen3
+```{r}
+spotify %>%
+  count(artist_name) %>%
+  top_n(5) %>%
+  ggplot(aes(x = reorder(artist_name, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "springgreen3", color="black") +
+  labs(title = "Top 5 Artists with the Most Songs",
+       x = NULL,
+       y = "Number of Songs")+
+  theme_minimal()
+```
+
