@@ -244,10 +244,10 @@ ui <- dashboardPage(skin = "green",
       menuItem("K-Pop and K-Pop Girl Group Table", tabName = "kpop"),
       menuItem("Average Duration", tabName = "duration"),
       menuItem("Explicit vs. Non-Explicit Songs", tabName = "loudness"),
-      menuItem("Danceability and Energy", tabName = "dance_energy"),
       menuItem("Danceability and Tempo", tabName = "dance_tempo"),
       menuItem("Energy and Tempo", tabName = "energy_tempo"),
       menuItem("Acoustics and Liveness", tabName = "acoustic_liveness"),
+      menuItem("Danceability and Energy", tabName = "dance_energy"),
       menuItem("Danceability and Valance", tabName = "dance_valance"),
       menuItem("Energy and Valance", tabName = "energy_valance")
     )
@@ -295,11 +295,7 @@ ui <- dashboardPage(skin = "green",
                 box(plotOutput("loudness"), width = 12)
               )
       ),
-      tabItem(tabName = "dance_energy",
-              fluidRow(
-                box(plotOutput("dance_energy"), width = 12)
-              )
-      ),
+
       tabItem(tabName = "dance_tempo",
               fluidRow(
                 box(plotOutput("dance_tempo"), width = 12)
@@ -314,7 +310,14 @@ ui <- dashboardPage(skin = "green",
               fluidRow(
                 box(plotOutput("acoustic_liveness"), width = 12)
               )
+              
       ),
+      tabItem(tabName = "dance_energy",
+              fluidRow(
+                box(plotOutput("dance_energy"), width = 12)
+              )
+      ),
+      
       tabItem(tabName = "dance_valance",
               fluidRow(
                 box(plotOutput("dance_valance"), width = 12)
@@ -391,7 +394,12 @@ server <- function(input, output) {
   output$kpop <- renderTable({
     spotify %>%
       filter(k_pop > 0 | k_pop_girl_group >0) %>%
-      select(artist_name, track_name)
+      mutate(k_pop_category = case_when(
+        k_pop == 1 & k_pop_girl_group == 0 ~ "k-pop only",
+        k_pop == 0 & k_pop_girl_group == 1 ~ "girl group only",
+        k_pop == 1 & k_pop_girl_group == 1 ~ "both"
+      )) %>%
+      select(artist_name, track_name, k_pop_category)
   })
   
   output$duration <- renderPlot({
@@ -415,19 +423,6 @@ server <- function(input, output) {
       labs(title = "Loudness of Explicit and Non-Explicit Songs",
            x = NULL,
            y = "Loudness")+
-      theme_minimal()+
-      theme(text = element_text(size = 20))+
-      theme(plot.title = element_text(hjust = 0.5))
-  })
-  
-  output$dance_energy <- renderPlot({
-    spotify %>% 
-      ggplot(aes(x = danceability, y = energy)) +
-      geom_point(size = 2.5) +
-      geom_smooth(method = "lm", color="springgreen3") +
-      labs(title = "Analysis of the Danceability and Energy of All Songs",
-           x = "Danceability",
-           y = "Energy")+
       theme_minimal()+
       theme(text = element_text(size = 20))+
       theme(plot.title = element_text(hjust = 0.5))
@@ -464,6 +459,19 @@ server <- function(input, output) {
       labs(title = "Analysis of the Acoustics and Liveness of All Songs",
            x = "Acousticness",
            y = "Liveness")+
+      theme_minimal()+
+      theme(text = element_text(size = 20))+
+      theme(plot.title = element_text(hjust = 0.5))
+  })
+  
+    output$dance_energy <- renderPlot({
+    spotify %>% 
+      ggplot(aes(x = danceability, y = energy)) +
+      geom_point(size = 2.5) +
+      geom_smooth(method = "lm", color="springgreen3") +
+      labs(title = "Analysis of the Danceability and Energy of All Songs",
+           x = "Danceability",
+           y = "Energy")+
       theme_minimal()+
       theme(text = element_text(size = 20))+
       theme(plot.title = element_text(hjust = 0.5))
