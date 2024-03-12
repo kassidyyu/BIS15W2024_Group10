@@ -89,14 +89,14 @@ spotify %>%
   arrange(desc(count))
 ```
 
-## Total number of songs from the top 5 artists
+## Total number of songs from the top 6 artists
 ```{r}
 spotify %>%
   count(artist_name) %>%
-  top_n(5) %>%
+  top_n(6) %>%
   ggplot(aes(x = reorder(artist_name, -n), y = n)) +
   geom_bar(stat = "identity", fill = "springgreen3", color="black") +
-  labs(title = "Top 5 Artists with the Most Songs",
+  labs(title = "Top Artists with the Most Songs",
        x = NULL,
        y = "Number of Songs")+
   theme_minimal()
@@ -172,7 +172,6 @@ spotify %>%
 spotify %>%
   ggplot(aes(x = danceability, y = tempo)) +
   geom_point(size=2.5) +
-   geom_smooth(method = "lm", color="springgreen3") +
   labs(title = "Analysis of the Danceability and Tempo of All Songs",
        x = "Danceability",
        y = "Tempo")+
@@ -184,20 +183,18 @@ spotify %>%
 spotify %>%
   ggplot(aes(x = energy, y = tempo)) +
   geom_point(size=2.5) +
-   geom_smooth(method = "lm", color="springgreen3") +
   labs(title = "Analysis of the Energy and Tempo of All Songs",
        x = "Energy",
        y = "Tempo")+
   theme_minimal()
 ```
 
-## Acousticts and liveiness of all songs
+## Acoustics and liveness of all songs
 ```{r}
 spotify %>%
   ggplot(aes(x = acousticness, y = liveness)) +
   geom_point(size=2.5) +
-  geom_smooth(method = "lm", color="springgreen3") +
-  labs(title = "Analysis of the Acousticts and Liveiness of All Songs",
+  labs(title = "Analysis of the Acoustics and Liveness of All Songs",
        x = "Acousticness",
        y = "Liveness")+
   theme_minimal()
@@ -228,6 +225,8 @@ spotify %>%
   theme_minimal()
 ```
 
+
+
 ## Make a shiny app for all the graphs used so far, seperate then into different tabs on the sidebar. color the dashboardpage springgreen3
 ```{r} 
 library(shiny)
@@ -238,9 +237,8 @@ ui <- dashboardPage(skin = "green",
   dashboardSidebar(
     sidebarMenu(
       menuItem("Songs in Each Genre", tabName = "genre"),
-      menuItem("Top 5 Artists", tabName = "top5"),
       menuItem("Pop Songs Table", tabName = "pop"),
-      menuItem("Pop Artist Table", tabName = "pop_artist"),
+      menuItem("Top Artists", tabName = "top5"),
       menuItem("Pop Genres", tabName = "pop_genre"),
       menuItem("Canadian Pop Table", tabName = "canadian_pop"),
       menuItem("K-Pop and K-Pop Girl Group Table", tabName = "kpop"),
@@ -249,7 +247,7 @@ ui <- dashboardPage(skin = "green",
       menuItem("Danceability and Energy", tabName = "dance_energy"),
       menuItem("Danceability and Tempo", tabName = "dance_tempo"),
       menuItem("Energy and Tempo", tabName = "energy_tempo"),
-      menuItem("Acousticts and Liveiness", tabName = "acoustic_liveness"),
+      menuItem("Acoustics and Liveness", tabName = "acoustic_liveness"),
       menuItem("Danceability and Valance", tabName = "dance_valance"),
       menuItem("Energy and Valance", tabName = "energy_valance")
     )
@@ -261,19 +259,15 @@ ui <- dashboardPage(skin = "green",
                 box(plotOutput("genre"), width = 12)
               )
       ),
-      tabItem(tabName = "top5",
-              fluidRow(
-                box(plotOutput("top5"), width = 12)
-              )
-      ),
+      
       tabItem(tabName = "pop",
               fluidRow(
                 box(tableOutput("pop"), width = 12)
               )
       ),
-      tabItem(tabName = "pop_artist",
+      tabItem(tabName = "top5",
               fluidRow(
-                box(tableOutput("pop_artist"), width = 12)
+                box(plotOutput("top5"), width = 12)
               )
       ),
       tabItem(tabName = "pop_genre",
@@ -354,10 +348,10 @@ server <- function(input, output) {
   output$top5 <- renderPlot({
     spotify %>%
       count(artist_name) %>%
-      top_n(5) %>%
+      top_n(6) %>%
       ggplot(aes(x = reorder(artist_name, -n), y = n)) +
       geom_bar(stat = "identity", fill = "springgreen3", color="black") +
-      labs(title = "Top 5 Artists with the Most Songs",
+      labs(title = "Top Artists with the Most Songs",
            x = NULL,
            y = "Number of Songs")+
       theme_minimal()+
@@ -371,13 +365,6 @@ server <- function(input, output) {
       select(track_name, artist_name)
   })
   
-  output$pop_artist <- renderTable({
-    spotify %>% 
-      filter(pop == 1) %>% 
-      group_by(artist_name) %>% 
-      summarise(count = n()) %>% 
-      arrange(desc(count))
-  })
   
   output$pop_genre <- renderPlot({
     spotify %>% 
@@ -450,7 +437,6 @@ server <- function(input, output) {
     spotify %>%
       ggplot(aes(x = danceability, y = tempo)) +
       geom_point(size=2.5) +
-      geom_smooth(method = "lm", color="springgreen3") +
       labs(title = "Analysis of the Danceability and Tempo of All Songs",
            x = "Danceability",
            y = "Tempo")+
@@ -463,7 +449,6 @@ server <- function(input, output) {
     spotify %>%
       ggplot(aes(x = energy, y = tempo)) +
       geom_point(size=2.5) +
-      geom_smooth(method = "lm", color="springgreen3") +
       labs(title = "Analysis of the Energy and Tempo of All Songs",
            x = "Energy",
            y = "Tempo")+
@@ -476,8 +461,7 @@ server <- function(input, output) {
     spotify %>%
       ggplot(aes(x = acousticness, y = liveness)) +
       geom_point(size=2.5) +
-      geom_smooth(method = "lm", color="springgreen3") +
-      labs(title = "Analysis of the Acousticts and Liveiness of All Songs",
+      labs(title = "Analysis of the Acoustics and Liveness of All Songs",
            x = "Acousticness",
            y = "Liveness")+
       theme_minimal()+
@@ -515,6 +499,7 @@ server <- function(input, output) {
 
 shinyApp(ui, server)
 ```
+
 
       
       
