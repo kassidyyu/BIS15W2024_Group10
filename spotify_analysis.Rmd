@@ -75,7 +75,7 @@ spotify %>%
 ```
 
 
-## Pull all the pop songs and make a scatterplot graph with the dancibility and energy. Make sure to add color
+## Pull all the pop songs and make a scatterplot graph with the dancibility and energy. Make sure to add color to the plot
 ```{r}
 spotify %>% 
   filter(pop > 0) %>% 
