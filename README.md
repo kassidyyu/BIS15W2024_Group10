@@ -9,4 +9,4 @@ We made the graphs during our group meetings on Lejla's computer, but we all hel
 Lejla was the main person in charge of organizing our repository. Lejla also put the shiny app together.
 Kassidy helped edit the shiny app code and made sure it could run smoothly. 
 We got help from AI to troubleshoot errors and form the shiny app.
-Maya the Google Slides.
+Maya made the Google Slides.
